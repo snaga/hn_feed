@@ -1,5 +1,5 @@
 CREATE TABLE hn_feed (
-  itmeid SERIAL PRIMARY KEY,
+  itemid SERIAL PRIMARY KEY,
   published TIMESTAMP NOT NULL,
   title TEXT NOT NULL,
   link TEXT NOT NULL,
@@ -10,5 +10,5 @@ CREATE TABLE hn_feed (
 );
 
 CREATE INDEX hn_feed_published_idx ON hn_feed (published);
-CREATE INDEX hn_feed_link_digest_idx ON hn_feed (link_digest);
+CREATE UNIQUE INDEX hn_feed_link_digest_uniq_idx ON hn_feed (link_digest);
 CREATE INDEX hn_feed_comments_digest_idx ON hn_feed (comments_digest);
