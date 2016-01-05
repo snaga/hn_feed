@@ -2,12 +2,12 @@
 
 import feedparser
 import hashlib
+import json
+import os
+import psycopg2
+import sys
 import time
 from datetime import datetime
-import json
-import psycopg2
-import os
-import sys
 
 #print feed
 
@@ -28,6 +28,9 @@ class HackerNewsCrawler:
         if self.dbname is None or self.dbuser is None:
             print("DBNAME and DBUSER must be specified.")
             sys.exit(1)
+
+    def start(self):
+        self.connectdb()
 
     def connectdb(self):
         connstr = "dbname=%s user=%s" % (self.dbname, self.dbuser)
@@ -82,6 +85,8 @@ class HackerNewsCrawler:
 
 crawler = HackerNewsCrawler()
 
-crawler.connectdb()
+crawler.start()
 crawler.run()
 crawler.finish()
+
+sys.exit(0)
