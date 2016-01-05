@@ -1,23 +1,33 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python2.6
 
 import feedparser
-import md5
+import hashlib
 import time
 from datetime import datetime
 import json
 import psycopg2
+import os
+import sys
 
 #print feed
 
 class HackerNewsCrawler:
     url = 'https://news.ycombinator.com/rss'
     feed = None
-    dbname = "hnfeed"
-    dbuser = "snaga"
+    dbname = None
+    dbuser = None
     conn = None
+    md5 = None
 
     def __init__(self):
-        pass
+        if 'DBNAME' in os.environ:
+            self.dbname = os.environ["DBNAME"]
+        if 'DBUSER' in os.environ:
+            self.dbuser = os.environ["DBUSER"]
+
+        if self.dbname is None or self.dbuser is None:
+            print("DBNAME and DBUSER must be specified.")
+            sys.exit(1)
 
     def connectdb(self):
         connstr = "dbname=%s user=%s" % (self.dbname, self.dbuser)
@@ -41,9 +51,9 @@ class HackerNewsCrawler:
             published = datetime(*e['published_parsed'][:6]).isoformat()
             title = e['title']
             link = e['link']
-            link_digest = md5.new(e['link']).hexdigest()
+            link_digest = hashlib.md5(e['link']).hexdigest()
             comments = e['comments']
-            comments_digest = md5.new(e['comments']).hexdigest()
+            comments_digest = hashlib.md5(e['comments']).hexdigest()
             feed = json.dumps(e, default=self.default_conv)
 
             if verbose is True:
