@@ -2,12 +2,16 @@
 
 import feedparser
 import hashlib
+import html2text
 import json
+import lxml
 import os
 import psycopg2
 import sys
 import time
+import urllib
 from datetime import datetime
+from readability.readability import Document
 
 #print feed
 
@@ -74,11 +78,37 @@ class HackerNewsCrawler:
             if item is not None:
                 print ("link_digest '%s' already exists. (seq = %d)" % (link_digest, item[0]))
             else:
-                cur.execute("INSERT INTO hn_feed (published,title,link,comments,link_digest,comments_digest,feed) VALUES (%s,%s,%s,%s,%s,%s,%s)", (published,title,link,comments,link_digest,comments_digest,feed))
+                content = self.get_page_content(link)
+
+                cur.execute("INSERT INTO hn_feed (published,title,link,comments,link_digest,comments_digest,feed,content) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)", (published,title,link,comments,link_digest,comments_digest,feed,content))
                 print ("link_digest '%s' appneded." % (link_digest))
 
         self.conn.commit()
         cur.close()
+
+    def get_page_content(self, url):
+        try:
+            u = urllib.urlopen(url)
+
+            ctype = u.info()['Content-Type']
+            if ctype.startswith("text/") is False:
+                print("The content is not text. (%s)" % ctype)
+                return None
+
+            html = u.read()
+            title = Document(html).short_title()
+
+            h2t = html2text.HTML2Text()
+            h2t.ignore_links = True
+            h2t.ignore_images = True
+            article = h2t.handle(Document(html).summary())
+
+        except lxml.etree.XMLSyntaxError, err:
+            return None
+        except IOError, err:
+            return None
+
+        return title + "\n\n" + article
 
     def finish(self):
         self.conn.close()

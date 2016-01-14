@@ -16,3 +16,5 @@ CREATE INDEX hn_feed_comments_digest_idx ON hn_feed (comments_digest);
 GRANT SELECT,INSERT ON hn_feed TO hnfeedcrawler;
 GRANT USAGE,SELECT,UPDATE ON hn_feed_itmeid_seq TO hnfeedcrawler;
 
+ALTER TABLE hn_feed ADD COLUMN content TEXT;
+
