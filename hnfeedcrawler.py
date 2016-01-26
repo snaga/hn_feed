@@ -90,6 +90,8 @@ class HackerNewsCrawler:
         try:
             u = urllib.urlopen(url)
 
+            if 'Content-Type' not in u.info():
+                return None
             ctype = u.info()['Content-Type']
             if ctype.startswith("text/") is False:
                 print("The content is not text. (%s)" % ctype)
